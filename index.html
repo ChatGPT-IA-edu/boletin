@@ -3,218 +3,367 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boletín Semanal de ChatGPT-IA-edu</title>
+    <title>Boletín de ChatGPT-IA-edu</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+
     <style>
+        /* --- General Styles --- */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0fdfa; /* emerald-50 */
         }
         h1, h2, h3, h4, h5, h6 {
             font-family: 'Poppins', sans-serif;
         }
-        .prose a {
-            color: #047857; /* emerald-700 */
-            font-weight: 500;
+        .card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
-        .prose a:hover {
-            color: #065f46; /* emerald-800 */
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1), 0 4px 6px -2px rgba(16, 185, 129, 0.05);
+        }
+        .loader {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- Modal --- */
+        #modal {
+            transition: opacity 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out;
+            opacity: 0;
+            backdrop-filter: blur(0px);
+        }
+        #modal.flex {
+            opacity: 1;
+            backdrop-filter: blur(4px);
+        }
+        #modal > div {
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            transform: scale(0.95) translateY(20px);
+            opacity: 0;
+        }
+        #modal.flex > div {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        /* --- Prose (Content) Styles --- */
+        .prose-custom h2 { 
+            border-bottom: 2px solid #34d399; /* emerald-400 */
+            padding-bottom: 0.5rem;
+        }
+        .prose-custom h3 { 
+            color: #059669; /* emerald-600 */
+        }
+        .prose-custom a { 
+            color: #047857; /* emerald-700 */
             text-decoration: underline;
         }
-        .prose blockquote {
-            border-left-color: #34d399; /* emerald-400 */
-            color: #065f46; /* emerald-800 */
-            background-color: #d1fae5; /* emerald-200 */
-            font-style: italic;
+        .prose-custom a:hover { color: #065f46; /* emerald-800 */ }
+        .prose-custom strong { 
+            color: #059669; /* emerald-600 */
+            font-weight: 600;
         }
-        .prose h2, .prose h3 {
-            color: #064e3b; /* emerald-900 */
+        .prose-custom blockquote { 
+            border-left: 4px solid #10b981; /* emerald-500 */
+            background-color: #ecfdf5; /* emerald-100 */
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
         }
-        /* Estilo para el selector de año */
-        .year-selector {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='%2310b981'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.7rem center;
-            background-size: 1.5em 1.5em;
+        .prose-custom code { 
+            color: #be123c; 
+            background-color: #f3f4f6; 
+            padding: 0.25em 0.5em; 
+            border-radius: 0.375rem;
         }
+        .dark .prose-custom a { color: #6ee7b7; /* emerald-300 */ }
+        .dark .prose-custom a:hover { color: #a7f3d0; /* emerald-200 */ }
+        .dark .prose-custom strong { color: #6ee7b7; /* emerald-300 */ }
+        .dark .prose-custom blockquote { 
+            border-left-color: #10b981; /* emerald-500 */
+            background-color: #064e3b; /* emerald-900 */
+            color: #d1fae5; /* emerald-200 */
+        }
+        .dark .prose-custom code { color: #fda4af; background-color: #374151; }
     </style>
 </head>
-<body class="text-gray-800 antialiased">
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
-    <!-- Encabezado -->
-    <header class="bg-white shadow-sm sticky top-0 z-20 border-b border-emerald-200">
-        <div class="container mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between">
-            <div class="flex items-center space-x-4 mb-4 sm:mb-0">
-                <a href="https://t.me/ChatGPTedu" target="_blank">
-                    <img id="logo" src="https://chatgpt-ia-edu.github.io/boletin/chatgptTelegram.jpeg" alt="Logotipo del grupo" class="h-14 w-14 sm:h-16 sm:w-16 rounded-full border-2 border-emerald-300 hover:scale-105 transition-transform duration-300">
-                </a>
-                <div>
-                    <h1 id="main-title" class="text-xl sm:text-2xl md:text-3xl font-bold text-emerald-800">Boletín del Grupo ChatGPT-IA-edu</h1>
-                    <p id="main-subtitle" class="text-sm sm:text-base text-gray-600 mt-1">Un resumen semanal de la comunidad</p>
+    <!-- Header -->
+    <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-md sticky top-0 z-20 py-4 px-4 md:px-8">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <img src="https://chatgpt-ia-edu.github.io/boletin/chatgptTelegram.jpeg" alt="Logo ChatGPT-IA-edu" class="h-12 md:h-14 w-auto rounded-full">
+                <div class="text-left">
+                    <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
+                        Boletín Semanal <a href="https://t.me/ChatGPTedu" target="_blank" rel="noopener noreferrer" class="text-emerald-600 dark:text-emerald-500 hover:underline">ChatGPT-IA-edu</a>
+                    </h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Resumen de conversaciones del grupo de Telegram</p>
                 </div>
             </div>
-            <!-- Selector de Año -->
-            <div id="year-selector-container" class="relative" style="display: none;">
-                <select id="year-selector" class="year-selector font-medium text-emerald-800 bg-emerald-100 border-2 border-emerald-300 rounded-lg py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
-                    <!-- Opciones de año se cargarán aquí -->
-                </select>
+            <div class="flex items-center gap-4">
+                <button id="theme-toggle" class="p-2 rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" aria-label="Cambiar tema"></button>
+                <select id="year-selector" class="bg-slate-200 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 rounded-md shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-500 focus:ring-opacity-50"></select>
             </div>
         </div>
     </header>
 
-    <!-- Indicador de Carga -->
-    <div id="loading-indicator" class="text-center py-20">
-        <div class="flex justify-center items-center space-x-2">
-            <svg class="animate-spin h-8 w-8 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span class="text-lg font-medium text-gray-600">Cargando boletín...</span>
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 md:p-8">
+        <div id="loader" class="flex justify-center items-center py-20">
+            <div class="loader ease-linear rounded-full border-8 border-t-8 border-slate-200 dark:border-slate-600 h-32 w-32" style="border-top-color: #10b981;"></div>
+        </div>
+        <div id="no-results" class="text-center py-20 hidden">
+            <h2 class="text-2xl font-bold text-slate-600 dark:text-slate-400">No se encontraron boletines</h2>
+        </div>
+        <div id="newsletter-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+    <!-- Modal for full newsletter -->
+    <div id="modal" class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[90vh] flex flex-col rounded-lg shadow-2xl">
+            <div class="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700">
+                <h2 id="modal-title" class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white truncate pr-4"></h2>
+                <button id="modal-close" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white text-3xl font-bold">&times;</button>
+            </div>
+            <div class="overflow-y-auto p-6">
+                <p id="modal-date" class="text-sm text-emerald-600 dark:text-emerald-400 font-semibold mb-4"></p>
+                <!-- Summary -->
+                <div id="modal-summary" class="prose prose-custom max-w-none mb-6"></div>
+                <!-- Quote -->
+                <div id="modal-quote" class="prose prose-custom max-w-none my-6"></div>
+                <!-- Main Body -->
+                <div id="modal-body" class="prose prose-custom max-w-none"></div>
+            </div>
         </div>
     </div>
-    
-    <!-- Contenedor principal de las entradas -->
-    <main class="container mx-auto px-4 sm:px-6 py-8 md:py-12">
-        <div id="entries-container" class="space-y-12">
-            <!-- Las entradas del boletín se cargarán aquí -->
-        </div>
-    </main>
-    
-    <!-- Plantilla para una entrada del boletín (oculta) -->
-    <template id="entry-template">
-        <article class="bg-white p-5 sm:p-6 md:p-8 rounded-xl shadow-lg border border-gray-200 transition-shadow duration-300 hover:shadow-xl">
-            <header class="mb-4">
-                <div class="flex flex-wrap items-center text-sm text-gray-500 mb-3">
-                    <div class="flex items-center mr-4 mb-1 sm:mb-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                        <span class="font-medium entry-date"></span>
-                    </div>
-                    <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
-                        <span class="font-medium entry-author"></span>
-                    </div>
-                </div>
-                <h2 class="entry-title text-2xl md:text-3xl font-bold text-gray-800"></h2>
-            </header>
-            <div class="entry-image-container my-6" style="display: none;"><img class="entry-image w-full h-auto max-h-96 object-cover rounded-lg shadow-md" src="" alt="Imagen de la entrada"></div>
-            <div class="entry-summary prose prose-lg max-w-none text-gray-700 mb-6"></div>
-            <div class="entry-quote-container my-6" style="display: none;"><blockquote class="entry-quote prose prose-xl max-w-none p-4 rounded-lg"></blockquote></div>
-            <div class="entry-body prose prose-lg max-w-none text-gray-700"></div>
-            <div class="entry-audio-container mt-6" style="display: none;"><audio class="entry-audio w-full rounded-lg" controls></audio></div>
-        </article>
-    </template>
 
     <script>
+        // --- THEME MANAGEMENT ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
+        const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeToggle.innerHTML = sunIcon;
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggle.innerHTML = moonIcon;
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
+        // --- APP LOGIC ---
+        const CONFIG_URL = 'https://raw.githubusercontent.com/ChatGPT-IA-edu/boletin/refs/heads/main/config.json';
+        const CORS_PROXY = 'https://corsproxy.io/?';
+
         document.addEventListener('DOMContentLoaded', async () => {
-            const loadingIndicator = document.getElementById('loading-indicator');
-            const entriesContainer = document.getElementById('entries-container');
-            const entryTemplate = document.getElementById('entry-template');
             const yearSelector = document.getElementById('year-selector');
-            const yearSelectorContainer = document.getElementById('year-selector-container');
+            const loader = document.getElementById('loader');
+            const newsletterGrid = document.getElementById('newsletter-grid');
+            const noResults = document.getElementById('no-results');
+            const modal = document.getElementById('modal');
+            const modalClose = document.getElementById('modal-close');
             
-            const markdownConverter = new showdown.Converter();
-            const configUrl = 'https://raw.githubusercontent.com/ChatGPT-IA-edu/boletin/refs/heads/main/config.json';
-            let configData = {};
+            let allNewsletters = [];
 
-            const loadCSVData = async (csvUrl) => {
-                entriesContainer.innerHTML = '';
-                loadingIndicator.style.display = 'flex';
+            const markdownConverter = new showdown.Converter({
+                simplifiedAutoLink: true,
+                strikethrough: true,
+                tables: true
+            });
+
+            function parseCSV(text) {
+                const rows = [];
+                let fields = [];
+                let currentField = '';
+                let inQuotes = false;
+
+                text = text.trim() + '\n';
+
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i];
+                    const nextChar = text[i + 1];
+
+                    if (inQuotes) {
+                        if (char === '"' && nextChar === '"') {
+                            currentField += '"';
+                            i++;
+                        } else if (char === '"') {
+                            inQuotes = false;
+                        } else {
+                            currentField += char;
+                        }
+                    } else {
+                        if (char === '"') {
+                            inQuotes = true;
+                        } else if (char === ',') {
+                            fields.push(currentField);
+                            currentField = '';
+                        } else if (char === '\n' || char === '\r') {
+                            if (nextChar === '\n' && char === '\r') i++;
+                            
+                            fields.push(currentField);
+                            if (fields.length > 1 || (fields.length === 1 && fields[0] !== '')) {
+                                rows.push(fields);
+                            }
+                            fields = [];
+                            currentField = '';
+                        } else {
+                            currentField += char;
+                        }
+                    }
+                }
+
+                const headers = rows[0].map(h => h.trim());
+                return rows.slice(1).map(values => {
+                    const entry = headers.reduce((obj, header, index) => {
+                        obj[header] = values[index] ? values[index].trim() : '';
+                        return obj;
+                    }, {});
+                    return entry;
+                }).filter(item => item && item['ID del Boletín']);
+            }
+
+            function renderCards(newsletters) {
+                newsletterGrid.innerHTML = '';
+                if (newsletters.length === 0) {
+                    noResults.classList.remove('hidden');
+                    return;
+                }
+                noResults.classList.add('hidden');
+
+                newsletters.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'card bg-white dark:bg-slate-800 rounded-lg overflow-hidden shadow-md flex flex-col border border-slate-200 dark:border-slate-700';
+                    card.innerHTML = `
+                        <div class="p-5 flex-grow flex flex-col">
+                            <p class="text-sm text-emerald-600 dark:text-emerald-400 font-semibold mb-1">${item['Fecha de Publicación']}</p>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 flex-grow">${item['Título del Boletín']}</h3>
+                            <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">${item['Resumen'].substring(0, 100)}...</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700">
+                            <button data-id="${item['ID del Boletín']}" class="read-more-btn w-full text-center font-bold text-emerald-600 hover:text-emerald-500 dark:text-emerald-500 dark:hover:text-emerald-400 transition-colors">
+                                Leer boletín &rarr;
+                            </button>
+                        </div>
+                    `;
+                    newsletterGrid.appendChild(card);
+                });
+            }
+
+            function openModal(id) {
+                const item = allNewsletters.find(n => n['ID del Boletín'] === id);
+                if (!item) return;
+
+                document.getElementById('modal-title').textContent = item['Título del Boletín'];
+                document.getElementById('modal-date').textContent = item['Fecha de Publicación'];
                 
-                try {
-                    const response = await fetch(csvUrl);
-                    if (!response.ok) throw new Error(`No se pudo cargar el archivo CSV: ${response.statusText}`);
-                    const csvText = await response.text();
-                    
-                    const lines = csvText.trim().split(/\r?\n/);
-                    const headers = lines[0].split(',').map(h => h.trim());
-                    const dataRows = lines.slice(1);
-
-                    dataRows.reverse().forEach(line => {
-                        if (!line) return;
-                        const values = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g).map(v => v.replace(/^"|"$/g, '').trim());
-                        const entryData = headers.reduce((obj, header, index) => {
-                            obj[header] = values[index] || '';
-                            return obj;
-                        }, {});
-
-                        const entryElement = entryTemplate.content.cloneNode(true);
-
-                        entryElement.querySelector('.entry-date').textContent = entryData['Fecha'] || 'Sin fecha';
-                        entryElement.querySelector('.entry-author').textContent = entryData['Autor'] || 'Anónimo';
-                        entryElement.querySelector('.entry-title').textContent = entryData['Título'] || 'Sin título';
-
-                        if (entryData['Resumen']) {
-                            entryElement.querySelector('.entry-summary').innerHTML = markdownConverter.makeHtml(entryData['Resumen']);
-                        }
-                        if (entryData['Cuerpo Principal']) {
-                            entryElement.querySelector('.entry-body').innerHTML = markdownConverter.makeHtml(entryData['Cuerpo Principal']);
-                        }
-                        if (entryData['Cita']) {
-                            const quoteContainer = entryElement.querySelector('.entry-quote-container');
-                            quoteContainer.querySelector('.entry-quote').innerHTML = markdownConverter.makeHtml(entryData['Cita']);
-                            quoteContainer.style.display = 'block';
-                        }
-                        if (entryData['Imagen']) {
-                            const imageContainer = entryElement.querySelector('.entry-image-container');
-                            imageContainer.querySelector('.entry-image').src = entryData['Imagen'];
-                            imageContainer.querySelector('.entry-image').alt = `Imagen para: ${entryData['Título']}`;
-                            imageContainer.style.display = 'block';
-                        }
-                        if (entryData['Audio']) {
-                            const audioContainer = entryElement.querySelector('.entry-audio-container');
-                            audioContainer.querySelector('.entry-audio').src = entryData['Audio'];
-                            audioContainer.style.display = 'block';
-                        }
-                        entriesContainer.appendChild(entryElement);
-                    });
-                } catch (error) {
-                    console.error('Error al procesar el CSV:', error);
-                    entriesContainer.innerHTML = `<p class="text-red-600 font-semibold text-center">Error al cargar las entradas del boletín.</p>`;
-                } finally {
-                    loadingIndicator.style.display = 'none';
-                }
-            };
-
-            try {
-                const response = await fetch(configUrl);
-                if (!response.ok) throw new Error('No se pudo cargar config.json');
-                configData = await response.json();
-
-                // Poblar el selector de año
-                const years = Object.keys(configData);
-                if (years.length > 0) {
-                    years.forEach(year => {
-                        const option = document.createElement('option');
-                        option.value = year;
-                        option.textContent = year;
-                        yearSelector.appendChild(option);
-                    });
-                    yearSelectorContainer.style.display = 'block';
-                    
-                    // Cargar el primer año por defecto
-                    const initialYear = years[0];
-                    await loadCSVData(configData[initialYear]);
-
-                    // Añadir evento para cambiar de año
-                    yearSelector.addEventListener('change', (e) => {
-                        const selectedYear = e.target.value;
-                        loadCSVData(configData[selectedYear]);
-                    });
+                document.getElementById('modal-summary').innerHTML = markdownConverter.makeHtml(item['Resumen'] || '');
+                
+                const quoteContainer = document.getElementById('modal-quote');
+                if (item['Cita'] && item['Cita'].trim() !== '') {
+                    quoteContainer.innerHTML = `<blockquote>${markdownConverter.makeHtml(item['Cita'])}</blockquote>`;
+                    quoteContainer.style.display = 'block';
                 } else {
-                     throw new Error('El archivo config.json no contiene boletines.');
+                    quoteContainer.innerHTML = '';
+                    quoteContainer.style.display = 'none';
                 }
+
+                document.getElementById('modal-body').innerHTML = markdownConverter.makeHtml(item['Cuerpo Principal (Markdown)'] || '');
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = 'auto';
+            }
+
+            async function loadAndProcessData(year, yearUrls) {
+                loader.style.display = 'flex';
+                newsletterGrid.innerHTML = '';
+                noResults.classList.add('hidden');
+                
+                const csvUrl = yearUrls[year];
+                if (!csvUrl) {
+                    showError(`No se encontró URL para el año ${year}.`);
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${CORS_PROXY}${encodeURIComponent(csvUrl)}`);
+                    if (!response.ok) throw new Error(`HTTP error fetching CSV! status: ${response.status}`);
+                    const csvText = await response.text();
+
+                    allNewsletters = parseCSV(csvText).sort((a, b) => new Date(b['Fecha de Publicación']) - new Date(a['Fecha de Publicación']));
+                    renderCards(allNewsletters);
+
+                } catch (error) {
+                    console.error(`Error loading data for year ${year}:`, error);
+                    newsletterGrid.innerHTML = `<p class="col-span-full text-center text-red-500">Error al cargar los datos.</p>`;
+                } finally {
+                    loader.style.display = 'none';
+                }
+            }
+
+            // --- Init ---
+            try {
+                const response = await fetch(CONFIG_URL);
+                if (!response.ok) throw new Error('Could not load config.json');
+                const yearUrls = await response.json();
+                
+                const years = Object.keys(yearUrls).sort((a, b) => b.localeCompare(a));
+                yearSelector.innerHTML = years.map(year => `<option value="${year}">${year}</option>`).join('');
+                
+                await loadAndProcessData(years[0], yearUrls);
+
+                yearSelector.addEventListener('change', (e) => loadAndProcessData(e.target.value, yearUrls));
 
             } catch (error) {
-                console.error('Error al inicializar la página:', error);
-                loadingIndicator.innerHTML = `<p class="text-red-600 font-semibold text-center">${error.message}</p>`;
+                console.error("Initialization failed:", error);
+                loader.style.display = 'none';
+                newsletterGrid.innerHTML = `<p class="col-span-full text-center text-red-500">No se pudo cargar la configuración del boletín.</p>`;
             }
+
+            // --- Modal Event Listeners ---
+            newsletterGrid.addEventListener('click', e => {
+                const button = e.target.closest('.read-more-btn');
+                if (button) {
+                    openModal(button.dataset.id);
+                }
+            });
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', e => {
+                if (e.target === modal) closeModal();
+            });
+            document.addEventListener('keydown', e => {
+                if (e.key === "Escape" && !modal.classList.contains('hidden')) closeModal();
+            });
         });
     </script>
 </body>
