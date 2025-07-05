@@ -53,7 +53,8 @@ let yearUrls = {};
 let currentAudio = null; // Global audio management
 
 // --- Config URLs ---
-const CONFIG_URL = 'https://raw.githubusercontent.com/Vibe-Coding-Educativo/boletin/refs/heads/main/config.json';
+// MODIFICACIÓN: URL de configuración actualizada al repositorio correcto.
+const CONFIG_URL = 'https://raw.githubusercontent.com/ChatGPT-IA-edu/boletin/refs/heads/main/config.json';
 const CORS_PROXY = 'https://corsproxy.io/?';
 
 // --- URL Management ---
@@ -61,7 +62,6 @@ function updateURLWithCard(cardId) {
     const url = new URL(window.location);
     url.searchParams.set('boletin', cardId);
     window.history.replaceState({}, '', url);
-    // No longer auto-copy to clipboard
 }
 
 function getCardIdFromURL() {
@@ -74,7 +74,6 @@ function copyToClipboard(text, message = 'Copiado al portapapeles') {
         showToast(message);
     }).catch(err => {
         console.error('Error al copiar al portapapeles:', err);
-        // Fallback for older browsers
         const textArea = document.createElement('textarea');
         textArea.value = text;
         document.body.appendChild(textArea);
@@ -90,7 +89,6 @@ function copyToClipboard(text, message = 'Copiado al portapapeles') {
 }
 
 function showToast(message, type = 'success') {
-    // Remove any existing toast
     const existingToast = document.getElementById('toast');
     if (existingToast) {
         existingToast.remove();
@@ -107,10 +105,8 @@ function showToast(message, type = 'success') {
     
     document.body.appendChild(toast);
     
-    // Animate in
     setTimeout(() => toast.classList.add('translate-x-0'), 10);
     
-    // Remove after 3 seconds
     setTimeout(() => {
         toast.classList.add('translate-x-full');
         setTimeout(() => toast.remove(), 300);
@@ -118,21 +114,13 @@ function showToast(message, type = 'success') {
 }
 
 function scrollToCard(cardId) {
-    // First check if the card exists in current newsletters
     const cardExists = allNewsletters.some(item => item.id === cardId);
     
     if (!cardExists) {
-        // Try to find the card in other years
-        const yearSelector = document.getElementById('year-selector');
-        if (yearSelector) {
-            const years = Array.from(yearSelector.options).map(option => option.value);
-            // For now, we'll just show a message. In a real app, you might want to load other years.
-            showToast('Boletín no encontrado en el año actual', 'error');
-            return;
-        }
+        showToast('Boletín no encontrado en el año actual', 'error');
+        return;
     }
 
-    // Clear filters to ensure the card is visible
     const searchInput = document.getElementById('search-input');
     const monthFilter = document.getElementById('month-filter');
     const weekFilter = document.getElementById('week-filter');
@@ -142,16 +130,13 @@ function scrollToCard(cardId) {
     if (weekFilter) weekFilter.value = '';
     activeKeywords = [];
     
-    // Re-render to ensure the card is visible
     applyFilters();
     
-    // Wait for render to complete, then scroll
     setTimeout(() => {
         const targetCard = document.querySelector(`[data-id="${cardId}"]`);
         if (targetCard) {
             const card = targetCard.closest('.card');
             if (card) {
-                // Store reference to highlighted card globally
                 window.highlightedCard = card;
                 
                 card.scrollIntoView({ 
@@ -159,10 +144,8 @@ function scrollToCard(cardId) {
                     block: 'center' 
                 });
                 
-                // Add highlight effect
                 card.classList.add('card-highlighted');
                 
-                // Remove highlight after 5 seconds or when modal opens
                 setTimeout(() => {
                     if (card.classList.contains('card-highlighted')) {
                         card.classList.remove('card-highlighted');
@@ -192,7 +175,7 @@ function pauseCurrentAudio() {
 }
 
 function setCurrentAudio(audioElement) {
-    pauseCurrentAudio(); // Pause any existing audio
+    pauseCurrentAudio();
     currentAudio = audioElement;
 }
 
@@ -203,14 +186,10 @@ function createAudioPlayer(src, isFullSize = false) {
     const audioHTML = `
         <audio id="${audioId}" controls class="${controlsClass}" preload="metadata">
             <source src="${src}" type="audio/mpeg">
-            <source src="${src}" type="audio/mp4">
-            <source src="${src}" type="audio/wav">
-            <source src="${src}" type="audio/ogg">
             Tu navegador no soporta el elemento de audio.
         </audio>
     `;
     
-    // We'll attach the event listener after the element is added to DOM
     setTimeout(() => {
         const audioElement = document.getElementById(audioId);
         if (audioElement) {
@@ -230,17 +209,14 @@ async function init() {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         yearUrls = await response.json();
         
-        populateYearSelector();
+        // MODIFICACIÓN: Se asegura de que se carguen los datos del año más reciente por defecto.
+        const latestYear = populateYearSelector();
         
-        const yearSelector = document.getElementById('year-selector');
-        const selectedYear = yearSelector ? yearSelector.value : null;
-        if (selectedYear) {
-            await loadAndProcessData(selectedYear);
+        if (latestYear) {
+            await loadAndProcessData(latestYear);
             
-            // Check if there's a specific card to navigate to
             const targetCardId = getCardIdFromURL();
             if (targetCardId) {
-                // Wait a bit more for cards to render, then scroll to target
                 setTimeout(() => {
                     scrollToCard(targetCardId);
                 }, 1000);
@@ -254,30 +230,27 @@ async function init() {
 
 function populateYearSelector() {
     const yearSelector = document.getElementById('year-selector');
-    if (!yearSelector) return;
+    if (!yearSelector) return null;
     
     const years = Object.keys(yearUrls).sort((a, b) => b - a);
     if (years.length === 0) {
         showError("No se encontraron años en la configuración.");
-        return;
+        return null;
     }
     
     yearSelector.innerHTML = years.map(year => `<option value="${year}">${year}</option>`).join('');
     
-    const currentYear = new Date().getFullYear().toString();
-    if (years.includes(currentYear)) {
-        yearSelector.value = currentYear;
-    }
+    // MODIFICACIÓN: Por defecto, se selecciona el año más reciente de la lista.
+    const latestYear = years[0];
+    yearSelector.value = latestYear;
+    return latestYear;
 }
 
 async function loadAndProcessData(year) {
     const newsletterGrid = document.getElementById('newsletter-grid');
     const noResults = document.getElementById('no-results');
     
-    // Clean up any highlighted card reference
     window.highlightedCard = null;
-    
-    // Pause any currently playing audio when changing data
     pauseCurrentAudio();
     
     showLoader(true);
@@ -286,7 +259,7 @@ async function loadAndProcessData(year) {
         newsletterGrid.classList.remove('loaded');
     }
     if (noResults) noResults.classList.add('hidden');
-    expandedCards.clear(); // Reset expanded cards when loading new data
+    expandedCards.clear();
     
     const csvUrl = yearUrls[year];
     if (!csvUrl) {
@@ -356,15 +329,12 @@ function parseCSV(text) {
         }
     }
 
-    // MODIFICACIÓN: Se ajusta la lógica para ser más robusta.
     return rows.slice(1).map(values => {
-        // La última columna requerida es 'faq', en el índice 8.
-        // Por lo tanto, necesitamos al menos 9 columnas (índices 0-8).
         if (values.length < 9) {
+            console.warn('Fila descartada por tener menos de 9 columnas:', values);
             return null;
         }
 
-        // Las palabras clave empiezan en el índice 9 y son opcionales.
         const keywordsRaw = values.length > 9 ? values.slice(9)
             .flatMap(kwCell => kwCell.split(','))
             .map(kw => kw.trim())
@@ -375,9 +345,7 @@ function parseCSV(text) {
             dateInfo: parseIdToDateInfo(values[1].trim()),
             title: values[3].trim(),
             summary: values[4].trim(),
-            // Nueva propiedad para las citas (en el índice 5)
             citas: values[5] ? values[5].trim() : '',
-            // Se ajustan los índices de las columnas siguientes
             body: values[6] ? values[6].trim() : '',
             link: values[7] ? values[7].trim() : '',
             faq: values[8] ? values[8].trim() : '',
@@ -393,7 +361,6 @@ function renderCards(newsletters) {
     
     if (!newsletterGrid || !noResults) return;
     
-    // Fade out grid for smooth transition
     newsletterGrid.classList.remove('loaded');
     
     setTimeout(() => {
@@ -407,7 +374,7 @@ function renderCards(newsletters) {
         newsletters.forEach((item, index) => {
             const card = document.createElement('div');
             card.className = 'card bg-white dark:bg-slate-800 rounded-lg overflow-hidden shadow-lg flex flex-col border border-slate-200 dark:border-slate-700';
-            card.style.animationDelay = `${index * 0.05}s`; // Stagger animation
+            card.style.animationDelay = `${index * 0.05}s`;
             
             const mediaEmbedHTML = generateMediaEmbed(item.link);
             const isExpanded = expandedCards.has(item.id);
@@ -464,11 +431,10 @@ function renderCards(newsletters) {
             newsletterGrid.appendChild(card);
         });
         
-        // Fade in grid after cards are added
         requestAnimationFrame(() => {
             newsletterGrid.classList.add('loaded');
         });
-    }, 150); // Small delay for smooth transition
+    }, 150);
 }
 
 function populateFilterOptions(newsletters) {
@@ -488,7 +454,6 @@ function populateFilterOptions(newsletters) {
         months.add(date.getMonth());
         weeks.add(getWeekNumber(date));
         
-        // Get the year from the newsletter data
         if (!currentYear) {
             currentYear = date.getFullYear();
         }
@@ -497,7 +462,6 @@ function populateFilterOptions(newsletters) {
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
     monthFilter.innerHTML = '<option value="">Todos los meses</option>' + [...months].sort((a,b) => a-b).map(m => `<option value="${m}">${monthNames[m]}</option>`).join('');
     
-    // Use the current year or fall back to current date year
     const yearForWeeks = currentYear || new Date().getFullYear();
     weekFilter.innerHTML = '<option value="">Todas las semanas</option>' + [...weeks].sort((a,b) => a-b).map(w => `<option value="${w}">${formatWeekDisplay(w, yearForWeeks)}</option>`).join('');
 }
@@ -523,7 +487,6 @@ function applyFilters() {
             
             const keywordMatch = activeKeywords.length === 0 || activeKeywords.every(ak => item.keywords.some(ik => normalizeText(ik) === normalizeText(ak)));
 
-            // MODIFICADO: La búsqueda ahora incluye el cuerpo, las FAQ y las citas
             const searchMatch = normalizedSearchTerm === '' ||
                 normalizeText(item.title).includes(normalizedSearchTerm) ||
                 normalizeText(item.summary).includes(normalizedSearchTerm) ||
@@ -560,40 +523,34 @@ function toggleKeywordFilter(keyword) {
 
 function expandCardKeywords(cardId) {
     expandedCards.add(cardId);
-    applyFilters(); // Re-render to show expanded keywords
+    applyFilters();
 }
 
 function collapseCardKeywords(cardId) {
     expandedCards.delete(cardId);
-    applyFilters(); // Re-render to show collapsed keywords
+    applyFilters();
 }
 
 function processMarkdownContent(content) {
     if (!content) return '';
     
-    // First, let's protect existing markdown links by temporarily replacing them
     const linkPlaceholders = new Map();
     let placeholderCounter = 0;
     
-    // Find and replace existing markdown links with placeholders
     let processed = content.replace(/\[([^\]]*)\]\(([^)]*)\)/g, (match, text, url) => {
         if (!url || url.trim() === '' || url === 'undefined') {
-            return text; // Just return the text if no valid URL
+            return text;
         }
         const placeholder = `__LINK_PLACEHOLDER_${placeholderCounter++}__`;
         linkPlaceholders.set(placeholder, `[${text}](${url})`);
         return placeholder;
     });
     
-    // Now fix other issues
     processed = processed
-        // Fix links that might have undefined in them (these are already handled above)
-        // Convert plain URLs to markdown links (now safe since existing links are protected)
         .replace(/https?:\/\/[^\s\)\]]+/g, (match) => {
             return `[${match}](${match})`;
         });
     
-    // Restore the original markdown links
     linkPlaceholders.forEach((originalLink, placeholder) => {
         processed = processed.replace(placeholder, originalLink);
     });
@@ -602,15 +559,12 @@ function processMarkdownContent(content) {
 }
 
 function processExternalLinks(htmlContent) {
-    // Create a temporary div to parse HTML
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = htmlContent;
     
-    // Find all links
     const links = tempDiv.querySelectorAll('a[href]');
     links.forEach(link => {
         const href = link.getAttribute('href');
-        // Check if it's an external link (starts with http/https and is not an anchor)
         if (href && (href.startsWith('http://') || href.startsWith('https://')) && !href.startsWith('#')) {
             link.setAttribute('target', '_blank');
             link.setAttribute('rel', 'noopener noreferrer');
@@ -626,7 +580,7 @@ function generateTableOfContents(htmlContent) {
     
     const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
     if (headings.length === 0) {
-        return { toc: '<p class="text-slate-500 dark:text-slate-400 italic">No se encontraron títulos en el contenido.</p>', content: htmlContent };
+        return { toc: '<p class="text-slate-500 dark:text-slate-400 italic">No se encontraron títulos.</p>', content: htmlContent };
     }
     
     let tocHtml = '<nav class="space-y-2">';
@@ -635,11 +589,9 @@ function generateTableOfContents(htmlContent) {
         const text = heading.textContent.trim();
         const id = `heading-${index}`;
         
-        // Add ID to the heading
         heading.id = id;
         
-        // Calculate indentation based on heading level
-        const indent = (level - 1) * 0.75; // 0.75rem per level
+        const indent = (level - 1) * 0.75;
         
         tocHtml += `
             <a href="#${id}" 
@@ -659,22 +611,17 @@ function openModal(id) {
     const item = allNewsletters.find(n => n.id === id);
     if (!item) return;
     
-    // Remove highlight from any highlighted card when opening modal
     if (window.highlightedCard) {
         window.highlightedCard.classList.remove('card-highlighted');
         window.highlightedCard = null;
     }
     
-    // Update URL and copy to clipboard
     updateURLWithCard(id);
-    
-    // Pause any currently playing audio when opening a new modal
     pauseCurrentAudio();
     
     const modal = document.getElementById('modal');
     if (!modal) return;
     
-    // MODIFICACIÓN: Obtener elementos y limpiar su contenido
     const titleElement = document.getElementById('modal-title');
     const dateElement = document.getElementById('modal-date');
     const quoteElement = document.getElementById('modal-quote-container');
@@ -683,7 +630,6 @@ function openModal(id) {
     const mobileSectionContent = document.getElementById('mobile-section-content');
     const videoElement = document.getElementById('modal-video-container');
     
-    // First, fade out content for smooth loading
     [quoteElement, bodyElement, faqDesktopElement, mobileSectionContent, videoElement].forEach(el => {
         if (el) {
             el.style.opacity = '0';
@@ -694,22 +640,17 @@ function openModal(id) {
     if (titleElement) titleElement.textContent = item.title;
     if (dateElement) dateElement.textContent = item.dateInfo.displayDate;
     
-    // Show modal with transition
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
-    // Force reflow to ensure hidden class is removed before adding flex
     modal.offsetHeight;
     
-    // Add flex class for transition
     requestAnimationFrame(() => {
         modal.classList.add('flex');
     });
     
-    // Reset reading mode
     modal.classList.remove('reading-mode');
     
-    // Configure marked.js options
     marked.setOptions({
         breaks: true,
         gfm: true,
@@ -717,39 +658,31 @@ function openModal(id) {
         mangle: false
     });
 
-    // Store the current item for TOC generation
     window.currentNewsletterItem = item;
 
-    // Load content with delay for smooth transition
     setTimeout(() => {
-        // MODIFICACIÓN: Añadir la cita si existe
         if (quoteElement && item.citas && item.citas.trim() !== '') {
-            // Usar marked para convertir la cita en un blockquote, respetando el estilo del tema
             const quoteHTML = marked.parse(`> ${item.citas}`);
             quoteElement.innerHTML = processExternalLinks(quoteHTML);
             quoteElement.style.opacity = '1';
             quoteElement.classList.add('content-fade-in');
         }
 
-        // Set content
         if (bodyElement) {
             const processedBody = processMarkdownContent(item.body || '*No hay contenido disponible.*');
             let htmlContent = marked.parse(processedBody);
             htmlContent = processExternalLinks(htmlContent);
             
-            // Generate TOC and get content with IDs
             const tocData = generateTableOfContents(htmlContent);
-            htmlContent = tocData.content; // Use the content with IDs added
+            htmlContent = tocData.content;
             
             bodyElement.innerHTML = htmlContent;
             bodyElement.style.opacity = '1';
             bodyElement.classList.add('content-fade-in');
             
-            // Store TOC
             window.currentTOC = tocData.toc;
         }
         
-        // Set FAQ (both desktop sidebar and mobile)
         const processedFaq = processMarkdownContent(item.faq || '*No hay preguntas frecuentes.*');
         let faqContent = marked.parse(processedFaq);
         faqContent = processExternalLinks(faqContent);
@@ -759,7 +692,6 @@ function openModal(id) {
             faqDesktopElement.classList.add('content-fade-in');
         }
         
-        // Set mobile section (initially FAQ)
         if (mobileSectionContent) {
             const mobileSectionTitle = document.getElementById('mobile-section-title');
             mobileSectionContent.innerHTML = faqContent;
@@ -770,13 +702,12 @@ function openModal(id) {
             }
         }
         
-        // Set media
         if (videoElement) {
             videoElement.innerHTML = generateMediaEmbed(item.link, true);
             videoElement.style.opacity = '1';
             videoElement.classList.add('content-fade-in');
         }
-    }, 200); // Slightly longer delay for smoother feel
+    }, 200);
 }
 
 
@@ -784,58 +715,41 @@ function closeModal() {
     const modal = document.getElementById('modal');
     if (!modal) return;
     
-    // Clear URL parameter when closing modal
     const url = new URL(window.location);
     url.searchParams.delete('boletin');
     window.history.replaceState({}, '', url);
     
-    // Start transition by removing flex class
     modal.classList.remove('flex');
     
-    // After transition, hide completely and restore scroll
     setTimeout(() => {
         modal.classList.add('hidden');
         document.body.style.overflow = 'auto';
-        // Clean up global variables
         window.currentNewsletterItem = null;
         window.currentTOC = null;
-    }, 400); // Match the enhanced CSS transition duration
+    }, 400);
 }
 
 function scrollToHeading(headingId) {
     const heading = document.getElementById(headingId);
     if (heading) {
-        // Get the scrollable container (the modal content area)
         const scrollContainer = heading.closest('.overflow-y-auto');
         
         if (scrollContainer) {
-            // Calculate offset for fixed header and add extra padding
             const headerHeight = document.querySelector('#modal .sticky').offsetHeight || 80;
             const elementPosition = heading.offsetTop;
-            const offsetPosition = elementPosition - headerHeight - 40; // Extra 40px padding for better readability
+            const offsetPosition = elementPosition - headerHeight - 40;
             
             scrollContainer.scrollTo({
-                top: Math.max(0, offsetPosition), // Ensure we don't scroll to negative values
-                behavior: 'smooth'
-            });
-        } else {
-            // Fallback - scroll to start position with offset
-            const headerHeight = 100; // Conservative estimate
-            const targetPosition = heading.offsetTop - headerHeight;
-            
-            window.scrollTo({
-                top: Math.max(0, targetPosition),
+                top: Math.max(0, offsetPosition),
                 behavior: 'smooth'
             });
         }
         
-        // Optional: Add a subtle highlight to the heading that was navigated to
         heading.style.background = 'linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, transparent 50%)';
         heading.style.paddingLeft = '1rem';
         heading.style.marginLeft = '-1rem';
         heading.style.transition = 'all 0.3s ease';
         
-        // Remove highlight after 2 seconds
         setTimeout(() => {
             heading.style.background = '';
             heading.style.paddingLeft = '';
@@ -851,21 +765,10 @@ function showTableOfContents() {
     const mobileSectionTitle = document.getElementById('mobile-section-title');
     
     if (window.currentTOC) {
-        // Update desktop sidebar
-        if (faqDesktopElement) {
-            faqDesktopElement.innerHTML = window.currentTOC;
-        }
-        if (sidebarTitle) {
-            sidebarTitle.textContent = 'Índice de Contenido';
-        }
-        
-        // Update mobile section
-        if (mobileSectionContent) {
-            mobileSectionContent.innerHTML = window.currentTOC;
-        }
-        if (mobileSectionTitle) {
-            mobileSectionTitle.textContent = 'Índice de Contenido';
-        }
+        if (faqDesktopElement) faqDesktopElement.innerHTML = window.currentTOC;
+        if (sidebarTitle) sidebarTitle.textContent = 'Índice de Contenido';
+        if (mobileSectionContent) mobileSectionContent.innerHTML = window.currentTOC;
+        if (mobileSectionTitle) mobileSectionTitle.textContent = 'Índice de Contenido';
     }
 }
 
@@ -880,21 +783,10 @@ function showFAQ() {
         let faqContent = marked.parse(processedFaq);
         faqContent = processExternalLinks(faqContent);
         
-        // Update desktop sidebar
-        if (faqDesktopElement) {
-            faqDesktopElement.innerHTML = faqContent;
-        }
-        if (sidebarTitle) {
-            sidebarTitle.textContent = 'Preguntas Frecuentes';
-        }
-        
-        // Update mobile section
-        if (mobileSectionContent) {
-            mobileSectionContent.innerHTML = faqContent;
-        }
-        if (mobileSectionTitle) {
-            mobileSectionTitle.textContent = 'Preguntas Frecuentes';
-        }
+        if (faqDesktopElement) faqDesktopElement.innerHTML = faqContent;
+        if (sidebarTitle) sidebarTitle.textContent = 'Preguntas Frecuentes';
+        if (mobileSectionContent) mobileSectionContent.innerHTML = faqContent;
+        if (mobileSectionTitle) mobileSectionTitle.textContent = 'Preguntas Frecuentes';
     }
 }
 
@@ -920,7 +812,6 @@ function parseIdToDateInfo(idString) {
     const parts = idString.split('_');
     if (parts.length < 3) return { startDate: null, endDate: null, displayDate: idString, weekNumber: null };
     
-    // Extract week number from the first part (format: AÑO-SEMANA)
     const yearWeekPart = parts[0];
     const yearWeekMatch = yearWeekPart.match(/^(\d{4})-(\d+)$/);
     const weekNumber = yearWeekMatch ? parseInt(yearWeekMatch[2], 10) : null;
@@ -938,7 +829,6 @@ function parseIdToDateInfo(idString) {
     const endMonth = endDate.toLocaleDateString('es-ES', { month: 'long' });
     const year = endDate.getFullYear();
 
-    let displayDate;
     const weekText = weekNumber ? `Semana ${weekNumber}` : '';
 
     let dateRangeText;
@@ -948,7 +838,7 @@ function parseIdToDateInfo(idString) {
         dateRangeText = `del ${startDay} de ${startMonth} al ${endDay} de ${endMonth} de ${year}`;
     }
     
-    displayDate = weekText ? `${weekText}: ${dateRangeText}` : dateRangeText;
+    const displayDate = weekText ? `${weekText}: ${dateRangeText}` : dateRangeText;
     
     return { startDate, endDate, displayDate, weekNumber };
 }
@@ -961,20 +851,14 @@ function getWeekNumber(d) {
 }
 
 function getWeekDates(weekNumber, year) {
-    // Get the first day of the year
     const firstDay = new Date(year, 0, 1);
-    
-    // Calculate days to add to get to the start of the specified week
-    // Week 1 is the first week with 4+ days in the new year
     const firstThursday = new Date(year, 0, 1 + (4 - firstDay.getDay() + 7) % 7);
     const firstWeekStart = new Date(firstThursday);
-    firstWeekStart.setDate(firstThursday.getDate() - 3); // Go back to Monday
+    firstWeekStart.setDate(firstThursday.getDate() - 3);
     
-    // Calculate the start of the target week
     const weekStart = new Date(firstWeekStart);
     weekStart.setDate(firstWeekStart.getDate() + (weekNumber - 1) * 7);
     
-    // Calculate the end of the week (Sunday)
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
     
@@ -991,10 +875,8 @@ function formatWeekDisplay(weekNumber, year) {
     
     let dateRange;
     if (start.getMonth() === end.getMonth()) {
-        // Same month
         dateRange = `del ${startDay} al ${endDay} de ${startMonth}`;
     } else {
-        // Different months
         dateRange = `del ${startDay} de ${startMonth} al ${endDay} de ${endMonth}`;
     }
     
@@ -1020,49 +902,19 @@ function generateMediaEmbed(link, fullSize = false) {
         }
     }
     
-    // Check for audio files (MP3, WAV, OGG, M4A)
     if (link.match(/\.(mp3|wav|ogg|m4a)$/i)) {
         const audioElement = createAudioPlayer(link, fullSize);
-        if (fullSize) {
-            return `<div class="w-full max-w-2xl mx-auto mb-8">${audioElement}</div>`;
-        } else {
-            return audioElement;
-        }
-    }
-
-    // Check for direct links to audio files in common hosting services
-    if (link.includes('drive.google.com') && link.includes('export=download')) {
-        const audioElement = createAudioPlayer(link, fullSize);
-        if (fullSize) {
-            return `<div class="w-full max-w-2xl mx-auto mb-8">${audioElement}</div>`;
-        } else {
-            return audioElement;
-        }
-    }
-
-    // Check for other audio hosting services
-    if (link.match(/\.(mp3|wav|ogg|m4a|aac|flac)/i) || 
-        link.includes('soundcloud.com') ||
-        link.includes('anchor.fm') ||
-        link.includes('podcast') ||
-        link.toLowerCase().includes('audio')) {
-        const audioElement = createAudioPlayer(link, fullSize);
-        if (fullSize) {
-            return `<div class="w-full max-w-2xl mx-auto mb-8">${audioElement}</div>`;
-        } else {
-            return audioElement;
-        }
+        return fullSize ? `<div class="w-full max-w-2xl mx-auto mb-8">${audioElement}</div>` : audioElement;
     }
 
     if (link.includes('ivoox.com')) {
         const embedLink = link.replace('_sq_f1', '_ep_1');
-        const ivooxElement = fullSize
+        return fullSize
             ? `<div class="w-full max-w-2xl mx-auto mb-8"><iframe width="100%" height="200" scrolling="no" frameborder="0" allowfullscreen="" src="${embedLink}" class="rounded-lg shadow-lg"></iframe></div>`
             : `<iframe width="100%" height="200" scrolling="no" frameborder="0" allowfullscreen="" src="${embedLink}"></iframe>`;
-        return ivooxElement;
     }
 
-    return ''; // Return empty if no known media type is found
+    return '';
 }
 
 // Event Listeners
@@ -1082,13 +934,10 @@ document.body.addEventListener('click', function(event) {
         event.stopPropagation();
         collapseCardKeywords(event.target.dataset.cardId);
     }
-    // Handle TOC link clicks
     if (event.target.dataset.headingId) {
         event.preventDefault();
-        const headingId = event.target.dataset.headingId;
-        scrollToHeading(headingId);
+        scrollToHeading(event.target.dataset.headingId);
     }
-    // Handle share button clicks
     if (event.target.closest('.share-btn')) {
         event.stopPropagation();
         const shareBtn = event.target.closest('.share-btn');
@@ -1101,7 +950,6 @@ document.body.addEventListener('click', function(event) {
     }
 });
 
-// Get elements for event listeners
 const yearSelector = document.getElementById('year-selector');
 const searchInput = document.getElementById('search-input');
 const monthFilter = document.getElementById('month-filter');
@@ -1125,39 +973,21 @@ document.addEventListener('keydown', (e) => {
     if (e.key === "Escape" && modal && !modal.classList.contains('hidden')) closeModal(); 
 });
 
-// Modal share button
 if (modalShare) modalShare.addEventListener('click', () => {
-    const currentUrl = window.location.href;
-    copyToClipboard(currentUrl, '🔗 Enlace del boletín copiado al portapapeles');
+    copyToClipboard(window.location.href, '🔗 Enlace del boletín copiado al portapapeles');
 });
 
-// New modal navigation
 if (navContent) navContent.addEventListener('click', () => {
-    // Show table of contents in sidebar
     showTableOfContents();
-    
-    // Scroll to content on mobile/when sidebar not visible
     const isDesktop = window.innerWidth >= 1024;
-    if (isDesktop) {
-        const contentElement = document.getElementById('modal-body-content');
-        if (contentElement) {
-            contentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    } else {
-        // On mobile, scroll to the mobile content section (now showing TOC)
-        const element = document.getElementById('mobile-content-section');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    const targetElement = isDesktop ? document.getElementById('modal-body-content') : document.getElementById('mobile-content-section');
+    if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 });
 if (navFaq) navFaq.addEventListener('click', () => {
-    // Show FAQ in sidebar
     showFAQ();
-    
-    // In mobile, scroll to mobile section
-    const isDesktop = window.innerWidth >= 1024;
-    if (!isDesktop) {
+    if (window.innerWidth < 1024) {
         const element = document.getElementById('mobile-content-section');
         if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1165,11 +995,9 @@ if (navFaq) navFaq.addEventListener('click', () => {
     }
 });
 if (toggleReadingModeBtn) toggleReadingModeBtn.addEventListener('click', () => {
-    const modal = document.getElementById('modal');
-    if (modal) modal.classList.toggle('reading-mode');
+    modal.classList.toggle('reading-mode');
 });
 
-// Make scrollToHeading globally available
 window.scrollToHeading = scrollToHeading;
 
 // --- Start the application ---
