@@ -7,15 +7,14 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tailwind CSS Config -->
     <script>
         tailwind.config = {
             darkMode: 'class',
         }
     </script>
     
-    <!-- Marked.js for Markdown rendering -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Marked.js for Markdown rendering (CDN link updated) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +24,7 @@
     <!-- Link to external CSS file -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
+<body class="bg-emerald-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
     <!-- Header -->
     <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-lg sticky top-0 z-20 py-4 px-4 md:px-8">
@@ -133,7 +132,7 @@
                             <!-- Media section -->
                             <div id="modal-video-container" class="w-full"></div>
                             
-                            <!-- MODIFICACIÓN: Contenedor de la cita, movido aquí -->
+                            <!-- Quote container -->
                             <div id="modal-quote-container" class="max-w-3xl mx-auto px-6 md:px-8"></div>
 
                             <!-- Article-style content -->
