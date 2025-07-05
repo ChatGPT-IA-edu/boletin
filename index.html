@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boletín Semanal de ChatGPT-IA-edu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdfa; /* emerald-50 */
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+        .prose a {
+            color: #047857; /* emerald-700 */
+            font-weight: 500;
+        }
+        .prose a:hover {
+            color: #065f46; /* emerald-800 */
+            text-decoration: underline;
+        }
+        .prose blockquote {
+            border-left-color: #34d399; /* emerald-400 */
+            color: #065f46; /* emerald-800 */
+            background-color: #d1fae5; /* emerald-200 */
+            font-style: italic;
+        }
+        .prose h2, .prose h3 {
+            color: #064e3b; /* emerald-900 */
+        }
+        /* Estilo para el selector de año */
+        .year-selector {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='%2310b981'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 1.5em 1.5em;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <!-- Encabezado -->
+    <header class="bg-white shadow-sm sticky top-0 z-20 border-b border-emerald-200">
+        <div class="container mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between">
+            <div class="flex items-center space-x-4 mb-4 sm:mb-0">
+                <a href="https://t.me/ChatGPTedu" target="_blank">
+                    <img id="logo" src="https://chatgpt-ia-edu.github.io/boletin/chatgptTelegram.jpeg" alt="Logotipo del grupo" class="h-14 w-14 sm:h-16 sm:w-16 rounded-full border-2 border-emerald-300 hover:scale-105 transition-transform duration-300">
+                </a>
+                <div>
+                    <h1 id="main-title" class="text-xl sm:text-2xl md:text-3xl font-bold text-emerald-800">Boletín del Grupo ChatGPT-IA-edu</h1>
+                    <p id="main-subtitle" class="text-sm sm:text-base text-gray-600 mt-1">Un resumen semanal de la comunidad</p>
+                </div>
+            </div>
+            <!-- Selector de Año -->
+            <div id="year-selector-container" class="relative" style="display: none;">
+                <select id="year-selector" class="year-selector font-medium text-emerald-800 bg-emerald-100 border-2 border-emerald-300 rounded-lg py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
+                    <!-- Opciones de año se cargarán aquí -->
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- Indicador de Carga -->
+    <div id="loading-indicator" class="text-center py-20">
+        <div class="flex justify-center items-center space-x-2">
+            <svg class="animate-spin h-8 w-8 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-lg font-medium text-gray-600">Cargando boletín...</span>
+        </div>
+    </div>
+    
+    <!-- Contenedor principal de las entradas -->
+    <main class="container mx-auto px-4 sm:px-6 py-8 md:py-12">
+        <div id="entries-container" class="space-y-12">
+            <!-- Las entradas del boletín se cargarán aquí -->
+        </div>
+    </main>
+    
+    <!-- Plantilla para una entrada del boletín (oculta) -->
+    <template id="entry-template">
+        <article class="bg-white p-5 sm:p-6 md:p-8 rounded-xl shadow-lg border border-gray-200 transition-shadow duration-300 hover:shadow-xl">
+            <header class="mb-4">
+                <div class="flex flex-wrap items-center text-sm text-gray-500 mb-3">
+                    <div class="flex items-center mr-4 mb-1 sm:mb-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <span class="font-medium entry-date"></span>
+                    </div>
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                        <span class="font-medium entry-author"></span>
+                    </div>
+                </div>
+                <h2 class="entry-title text-2xl md:text-3xl font-bold text-gray-800"></h2>
+            </header>
+            <div class="entry-image-container my-6" style="display: none;"><img class="entry-image w-full h-auto max-h-96 object-cover rounded-lg shadow-md" src="" alt="Imagen de la entrada"></div>
+            <div class="entry-summary prose prose-lg max-w-none text-gray-700 mb-6"></div>
+            <div class="entry-quote-container my-6" style="display: none;"><blockquote class="entry-quote prose prose-xl max-w-none p-4 rounded-lg"></blockquote></div>
+            <div class="entry-body prose prose-lg max-w-none text-gray-700"></div>
+            <div class="entry-audio-container mt-6" style="display: none;"><audio class="entry-audio w-full rounded-lg" controls></audio></div>
+        </article>
+    </template>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const entriesContainer = document.getElementById('entries-container');
+            const entryTemplate = document.getElementById('entry-template');
+            const yearSelector = document.getElementById('year-selector');
+            const yearSelectorContainer = document.getElementById('year-selector-container');
+            
+            const markdownConverter = new showdown.Converter();
+            const configUrl = 'https://raw.githubusercontent.com/ChatGPT-IA-edu/boletin/refs/heads/main/config.json';
+            let configData = {};
+
+            const loadCSVData = async (csvUrl) => {
+                entriesContainer.innerHTML = '';
+                loadingIndicator.style.display = 'flex';
+                
+                try {
+                    const response = await fetch(csvUrl);
+                    if (!response.ok) throw new Error(`No se pudo cargar el archivo CSV: ${response.statusText}`);
+                    const csvText = await response.text();
+                    
+                    const lines = csvText.trim().split(/\r?\n/);
+                    const headers = lines[0].split(',').map(h => h.trim());
+                    const dataRows = lines.slice(1);
+
+                    dataRows.reverse().forEach(line => {
+                        if (!line) return;
+                        const values = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g).map(v => v.replace(/^"|"$/g, '').trim());
+                        const entryData = headers.reduce((obj, header, index) => {
+                            obj[header] = values[index] || '';
+                            return obj;
+                        }, {});
+
+                        const entryElement = entryTemplate.content.cloneNode(true);
+
+                        entryElement.querySelector('.entry-date').textContent = entryData['Fecha'] || 'Sin fecha';
+                        entryElement.querySelector('.entry-author').textContent = entryData['Autor'] || 'Anónimo';
+                        entryElement.querySelector('.entry-title').textContent = entryData['Título'] || 'Sin título';
+
+                        if (entryData['Resumen']) {
+                            entryElement.querySelector('.entry-summary').innerHTML = markdownConverter.makeHtml(entryData['Resumen']);
+                        }
+                        if (entryData['Cuerpo Principal']) {
+                            entryElement.querySelector('.entry-body').innerHTML = markdownConverter.makeHtml(entryData['Cuerpo Principal']);
+                        }
+                        if (entryData['Cita']) {
+                            const quoteContainer = entryElement.querySelector('.entry-quote-container');
+                            quoteContainer.querySelector('.entry-quote').innerHTML = markdownConverter.makeHtml(entryData['Cita']);
+                            quoteContainer.style.display = 'block';
+                        }
+                        if (entryData['Imagen']) {
+                            const imageContainer = entryElement.querySelector('.entry-image-container');
+                            imageContainer.querySelector('.entry-image').src = entryData['Imagen'];
+                            imageContainer.querySelector('.entry-image').alt = `Imagen para: ${entryData['Título']}`;
+                            imageContainer.style.display = 'block';
+                        }
+                        if (entryData['Audio']) {
+                            const audioContainer = entryElement.querySelector('.entry-audio-container');
+                            audioContainer.querySelector('.entry-audio').src = entryData['Audio'];
+                            audioContainer.style.display = 'block';
+                        }
+                        entriesContainer.appendChild(entryElement);
+                    });
+                } catch (error) {
+                    console.error('Error al procesar el CSV:', error);
+                    entriesContainer.innerHTML = `<p class="text-red-600 font-semibold text-center">Error al cargar las entradas del boletín.</p>`;
+                } finally {
+                    loadingIndicator.style.display = 'none';
+                }
+            };
+
+            try {
+                const response = await fetch(configUrl);
+                if (!response.ok) throw new Error('No se pudo cargar config.json');
+                configData = await response.json();
+
+                // Poblar el selector de año
+                const years = Object.keys(configData);
+                if (years.length > 0) {
+                    years.forEach(year => {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
+                        yearSelector.appendChild(option);
+                    });
+                    yearSelectorContainer.style.display = 'block';
+                    
+                    // Cargar el primer año por defecto
+                    const initialYear = years[0];
+                    await loadCSVData(configData[initialYear]);
+
+                    // Añadir evento para cambiar de año
+                    yearSelector.addEventListener('change', (e) => {
+                        const selectedYear = e.target.value;
+                        loadCSVData(configData[selectedYear]);
+                    });
+                } else {
+                     throw new Error('El archivo config.json no contiene boletines.');
+                }
+
+            } catch (error) {
+                console.error('Error al inicializar la página:', error);
+                loadingIndicator.innerHTML = `<p class="text-red-600 font-semibold text-center">${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
