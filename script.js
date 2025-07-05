@@ -112,7 +112,7 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-function scrollToCard(cardId) {
+function scrollToCard(cardId, isDirectLink = false) {
     const cardExists = allNewsletters.some(item => item.id === cardId);
     
     if (!cardExists) {
@@ -145,12 +145,14 @@ function scrollToCard(cardId) {
                 
                 card.classList.add('card-highlighted');
                 
-                setTimeout(() => {
-                    if (card.classList.contains('card-highlighted')) {
-                        card.classList.remove('card-highlighted');
-                        window.highlightedCard = null;
-                    }
-                }, 5000);
+                if (!isDirectLink) {
+                    setTimeout(() => {
+                        if (card.classList.contains('card-highlighted')) {
+                            card.classList.remove('card-highlighted');
+                            window.highlightedCard = null;
+                        }
+                    }, 5000);
+                }
                 
                 showToast('📍 Navegado al boletín seleccionado');
             }
@@ -216,7 +218,7 @@ async function init() {
             const targetCardId = getCardIdFromURL();
             if (targetCardId) {
                 setTimeout(() => {
-                    scrollToCard(targetCardId);
+                    scrollToCard(targetCardId, true);
                 }, 1000);
             }
         }
@@ -370,7 +372,8 @@ function renderCards(newsletters) {
 
         newsletters.forEach((item, index) => {
             const card = document.createElement('div');
-            card.className = 'card bg-white dark:bg-slate-800 rounded-lg overflow-hidden shadow-lg flex flex-col border border-slate-200 dark:border-slate-700';
+            // MODIFICACIÓN: Se elimina la clase 'overflow-hidden' para que el cartel no se corte.
+            card.className = 'card bg-white dark:bg-slate-800 rounded-lg shadow-lg flex flex-col border border-slate-200 dark:border-slate-700';
             card.style.animationDelay = `${index * 0.05}s`;
             
             const mediaEmbedHTML = generateMediaEmbed(item.link);
@@ -662,7 +665,6 @@ function openModal(id) {
     window.currentNewsletterItem = item;
 
     setTimeout(() => {
-        // MODIFICACIÓN: Lógica para mostrar la cita
         if (quoteElement && item.citas && item.citas.trim() !== '') {
             quoteElement.innerHTML = `<p>${item.citas}</p>`;
             quoteElement.style.display = 'block';
@@ -671,7 +673,8 @@ function openModal(id) {
         }
 
         if (bodyElement) {
-            const processedBody = processMarkdownContent(item.body || '*No hay contenido disponible.*');
+            const bodyWithTitle = `<h2>Resumen</h2>\n${item.body || '*No hay contenido disponible.*'}`;
+            const processedBody = processMarkdownContent(bodyWithTitle);
             let htmlContent = marked.parse(processedBody);
             htmlContent = processExternalLinks(htmlContent);
             
