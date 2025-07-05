@@ -662,6 +662,7 @@ function openModal(id) {
     window.currentNewsletterItem = item;
 
     setTimeout(() => {
+        // MODIFICACIÓN: Lógica para mostrar la cita
         if (quoteElement && item.citas && item.citas.trim() !== '') {
             quoteElement.innerHTML = `<p>${item.citas}</p>`;
             quoteElement.style.display = 'block';
