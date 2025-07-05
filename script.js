@@ -53,7 +53,6 @@ let yearUrls = {};
 let currentAudio = null; // Global audio management
 
 // --- Config URLs ---
-// MODIFICACIÓN: URL de configuración actualizada al repositorio correcto.
 const CONFIG_URL = 'https://raw.githubusercontent.com/ChatGPT-IA-edu/boletin/refs/heads/main/config.json';
 const CORS_PROXY = 'https://corsproxy.io/?';
 
@@ -209,7 +208,6 @@ async function init() {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         yearUrls = await response.json();
         
-        // MODIFICACIÓN: Se asegura de que se carguen los datos del año más reciente por defecto.
         const latestYear = populateYearSelector();
         
         if (latestYear) {
@@ -240,7 +238,6 @@ function populateYearSelector() {
     
     yearSelector.innerHTML = years.map(year => `<option value="${year}">${year}</option>`).join('');
     
-    // MODIFICACIÓN: Por defecto, se selecciona el año más reciente de la lista.
     const latestYear = years[0];
     yearSelector.value = latestYear;
     return latestYear;
@@ -382,24 +379,24 @@ function renderCards(newsletters) {
             
             const keywordTags = keywordsToShow.map(kw => {
                 const isActive = activeKeywords.includes(kw);
-                const activeClass = isActive ? 'bg-amber-500 text-slate-800 dark:text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 hover:text-amber-700 dark:hover:bg-amber-900 dark:hover:text-amber-300';
+                const activeClass = isActive ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-emerald-100 hover:text-emerald-700 dark:hover:bg-emerald-900 dark:hover:text-emerald-300';
                 return `<span class="tag text-xs px-2 py-0.5 rounded ${activeClass}">${kw}</span>`;
             }).join('');
             
             const remainingCount = item.keywords.length - 3;
             const expandButton = !isExpanded && remainingCount > 0 
-                ? `<span class="expand-keywords text-xs text-amber-600 dark:text-amber-400 hover:text-amber-500 cursor-pointer font-medium" data-card-id="${item.id}">+${remainingCount} más</span>` 
+                ? `<span class="expand-keywords text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 cursor-pointer font-medium" data-card-id="${item.id}">+${remainingCount} más</span>` 
                 : '';
             
             const collapseButton = isExpanded && item.keywords.length > 3
-                ? `<span class="collapse-keywords text-xs text-amber-600 dark:text-amber-400 hover:text-amber-500 cursor-pointer font-medium" data-card-id="${item.id}">mostrar menos</span>`
+                ? `<span class="collapse-keywords text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 cursor-pointer font-medium" data-card-id="${item.id}">mostrar menos</span>`
                 : '';
 
             card.innerHTML = `
                 <div class="p-5 flex-grow flex flex-col">
                     <div class="flex justify-between items-start mb-1">
-                        <p class="text-sm text-amber-600 dark:text-amber-400 font-semibold">${item.dateInfo.displayDate}</p>
-                        <button class="share-btn text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 p-1 rounded" 
+                        <p class="text-sm text-emerald-600 dark:text-emerald-400 font-semibold">${item.dateInfo.displayDate}</p>
+                        <button class="share-btn text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 p-1 rounded" 
                                 data-share-id="${item.id}" 
                                 title="Copiar enlace directo">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -423,7 +420,7 @@ function renderCards(newsletters) {
                 </div>
                 ` : ''}
                 <div class="p-4 bg-slate-50 dark:bg-slate-800/50">
-                    <button data-id="${item.id}" class="read-more-btn w-full text-center font-bold text-amber-600 hover:text-amber-500 dark:text-amber-500 dark:hover:text-amber-400 transition-colors">
+                    <button data-id="${item.id}" class="read-more-btn w-full text-center font-bold text-emerald-600 hover:text-emerald-500 dark:text-emerald-500 dark:hover:text-emerald-400 transition-colors">
                         Leer boletín &rarr;
                     </button>
                 </div>
@@ -595,7 +592,7 @@ function generateTableOfContents(htmlContent) {
         
         tocHtml += `
             <a href="#${id}" 
-               class="block text-sm hover:text-amber-600 dark:hover:text-amber-400 transition-colors py-1 px-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
+               class="block text-sm hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors py-1 px-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
                style="margin-left: ${indent}rem;"
                data-heading-id="${id}">
                 ${text}
@@ -630,12 +627,16 @@ function openModal(id) {
     const mobileSectionContent = document.getElementById('mobile-section-content');
     const videoElement = document.getElementById('modal-video-container');
     
-    [quoteElement, bodyElement, faqDesktopElement, mobileSectionContent, videoElement].forEach(el => {
+    [bodyElement, faqDesktopElement, mobileSectionContent, videoElement].forEach(el => {
         if (el) {
             el.style.opacity = '0';
             el.innerHTML = '';
         }
     });
+     if (quoteElement) {
+        quoteElement.style.display = 'none';
+        quoteElement.innerHTML = '';
+    }
     
     if (titleElement) titleElement.textContent = item.title;
     if (dateElement) dateElement.textContent = item.dateInfo.displayDate;
@@ -662,8 +663,8 @@ function openModal(id) {
 
     setTimeout(() => {
         if (quoteElement && item.citas && item.citas.trim() !== '') {
-            const quoteHTML = marked.parse(`> ${item.citas}`);
-            quoteElement.innerHTML = processExternalLinks(quoteHTML);
+            quoteElement.innerHTML = `<p>${item.citas}</p>`;
+            quoteElement.style.display = 'block';
             quoteElement.style.opacity = '1';
             quoteElement.classList.add('content-fade-in');
         }
@@ -745,7 +746,7 @@ function scrollToHeading(headingId) {
             });
         }
         
-        heading.style.background = 'linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, transparent 50%)';
+        heading.style.background = 'linear-gradient(90deg, rgba(16, 185, 129, 0.1) 0%, transparent 50%)';
         heading.style.paddingLeft = '1rem';
         heading.style.marginLeft = '-1rem';
         heading.style.transition = 'all 0.3s ease';
