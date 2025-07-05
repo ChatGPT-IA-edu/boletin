@@ -356,32 +356,36 @@ function parseCSV(text) {
         }
     }
 
-    // MODIFICACIÓN: Adaptado para la nueva columna "Citas"
+    // MODIFICACIÓN: Se ajusta la lógica para ser más robusta.
     return rows.slice(1).map(values => {
-        // La nueva columna aumenta la longitud esperada a 10
-        if (values.length < 10) return null;
+        // La última columna requerida es 'faq', en el índice 8.
+        // Por lo tanto, necesitamos al menos 9 columnas (índices 0-8).
+        if (values.length < 9) {
+            return null;
+        }
 
-        // Las palabras clave ahora empiezan en el índice 9
-        const keywordsRaw = values.slice(9)
+        // Las palabras clave empiezan en el índice 9 y son opcionales.
+        const keywordsRaw = values.length > 9 ? values.slice(9)
             .flatMap(kwCell => kwCell.split(','))
             .map(kw => kw.trim())
-            .filter(kw => kw);
+            .filter(kw => kw) : [];
 
         return {
             id: values[1].trim(),
             dateInfo: parseIdToDateInfo(values[1].trim()),
             title: values[3].trim(),
             summary: values[4].trim(),
-            // Nueva propiedad para las citas
-            citas: values[5].trim(),
+            // Nueva propiedad para las citas (en el índice 5)
+            citas: values[5] ? values[5].trim() : '',
             // Se ajustan los índices de las columnas siguientes
-            body: values[6].trim(),
-            link: values[7].trim(),
-            faq: values[8].trim(),
+            body: values[6] ? values[6].trim() : '',
+            link: values[7] ? values[7].trim() : '',
+            faq: values[8] ? values[8].trim() : '',
             keywords: keywordsRaw
         };
     }).filter(item => item && item.id).sort((a, b) => b.dateInfo.startDate - a.dateInfo.startDate);
 }
+
 
 function renderCards(newsletters) {
     const newsletterGrid = document.getElementById('newsletter-grid');
