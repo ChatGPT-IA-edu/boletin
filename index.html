@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boletín ChatGPT-IA-edu</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -13,20 +12,16 @@
         }
     </script>
     
-    <!-- Marked.js for Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-    <!-- Link to external CSS file -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-emerald-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
-    <!-- Header -->
     <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-lg sticky top-0 z-20 py-4 px-4 md:px-8">
         <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-4">
@@ -40,17 +35,14 @@
             </div>
             <div class="flex items-center gap-4">
                 <button id="theme-toggle" class="p-2 rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" aria-label="Cambiar tema">
-                    <!-- SVG icon will be injected here by JS -->
-                </button>
+                    </button>
                 <select id="year-selector" class="bg-slate-200 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 rounded-md shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-500 focus:ring-opacity-50"></select>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="container mx-auto p-4 md:p-8">
 
-        <!-- Filters and Search -->
         <div class="mb-8 p-4 bg-white dark:bg-slate-800 rounded-lg shadow-md">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -72,32 +64,26 @@
             </div>
         </div>
 
-        <!-- Loading Spinner -->
         <div id="loader" class="flex justify-center items-center py-20">
             <div class="loader ease-linear rounded-full border-8 border-t-8 border-slate-200 dark:border-slate-600 h-32 w-32"></div>
         </div>
         
-        <!-- No Results Message -->
         <div id="no-results" class="text-center py-20 hidden">
             <h2 class="text-2xl font-bold text-slate-600 dark:text-slate-400">No se encontraron boletines</h2>
             <p class="text-slate-500 dark:text-slate-500 mt-2">Prueba a cambiar los filtros o el término de búsqueda.</p>
         </div>
 
-        <!-- Newsletter Grid -->
         <div id="newsletter-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 loaded"></div>
     </main>
 
-    <!-- Modal for full newsletter -->
     <div id="modal" class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center p-0">
         <div class="bg-white dark:bg-slate-900 w-full h-full flex flex-col">
-            <!-- Header -->
             <div class="flex justify-between items-center p-4 md:p-6 border-b border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm sticky top-0 z-10">
                 <div class="flex-1 min-w-0">
                     <h2 id="modal-title" class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white truncate pr-4"></h2>
                     <p id="modal-date" class="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1"></p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <!-- Quick navigation -->
                     <nav class="hidden md:flex items-center gap-3 text-sm">
                         <button id="nav-content" class="text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Contenido</button>
                         <span class="text-slate-300 dark:text-slate-600">|</span>
@@ -123,26 +109,20 @@
                 </div>
             </div>
             
-            <!-- Content -->
             <div class="flex-1 overflow-hidden">
                 <div class="h-full flex">
-                    <!-- Main content area -->
                     <div class="flex-1 overflow-y-auto">
                         <div class="max-w-4xl mx-auto">
-                            <!-- Media section -->
                             <div id="modal-video-container" class="w-full"></div>
                             
-                            <!-- Quote container -->
                             <div id="modal-quote-container" class="max-w-3xl mx-auto px-6 md:px-8"></div>
 
-                            <!-- Article-style content -->
                             <article class="max-w-3xl mx-auto px-6 md:px-8 py-8">
                                 <div id="modal-body-content" class="prose prose-custom prose-lg max-w-none"></div>
                             </article>
                         </div>
                     </div>
                     
-                    <!-- Sidebar -->
                     <aside id="modal-sidebar" class="hidden lg:block w-80 bg-slate-50 dark:bg-slate-800/50 border-l border-slate-200 dark:border-slate-700 overflow-y-auto">
                         <div class="p-6">
                             <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Preguntas Frecuentes</h3>
@@ -151,7 +131,6 @@
                     </aside>
                 </div>
                 
-                <!-- Mobile FAQ/TOC section -->
                 <section id="mobile-content-section" class="lg:hidden border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
                     <div class="max-w-3xl mx-auto px-6 md:px-8 py-8">
                         <h3 id="mobile-section-title" class="text-xl font-semibold text-slate-900 dark:text-white mb-4">Preguntas Frecuentes</h3>
@@ -162,18 +141,12 @@
         </div>
     </div>
     
-    <!-- Footer -->
     <footer id="page-footer" class="mt-12 py-6 border-t border-slate-200 dark:border-slate-700 text-center text-slate-500 dark:text-slate-400 text-sm">
-        <div class="flex flex-col md:flex-row justify-center items-center gap-x-4 gap-y-2">
-            <a href="https://labia.tiddlyhost.com" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Laboratorio de aplicaciones educativas.</a>
-            <span class="hidden md:inline">·</span>
-            <a href="https://bilateria.org" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Aplicación hecha por Juan José de Haro.</a>
-             <span class="hidden md:inline">·</span>
-            <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Licencia Creative Commons BY-SA.</a>
+        <div>
+            <a href="https://chatgpt-ia-edu.github.io/" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Visita la página de la comunidad</a>
         </div>
     </footer>
 
-    <!-- Link to external JS file -->
     <script src="script.js" defer></script>
 </body>
 </html>
