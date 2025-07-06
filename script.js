@@ -51,6 +51,8 @@ let activeKeywords = [];
 let expandedCards = new Set();
 let yearUrls = {};
 let currentAudio = null; // Global audio management
+// MODIFICACIÓN: Variable para guardar el último año válido seleccionado
+let currentDataYear = null; 
 
 // --- Config URLs ---
 const CONFIG_URL = 'https://raw.githubusercontent.com/ChatGPT-IA-edu/boletin/refs/heads/main/config.json';
@@ -228,22 +230,28 @@ async function init() {
     }
 }
 
+// MODIFICACIÓN: Se añade la opción 2024 y se guarda el año actual con datos.
 function populateYearSelector() {
     const yearSelector = document.getElementById('year-selector');
     if (!yearSelector) return null;
     
-    const years = Object.keys(yearUrls).sort((a, b) => b - a);
-    if (years.length === 0) {
+    const yearsFromConfig = Object.keys(yearUrls).sort((a, b) => b - a);
+    if (yearsFromConfig.length === 0) {
         showError("No se encontraron años en la configuración.");
         return null;
     }
+
+    // Añadir 2024 a la lista de años a mostrar
+    const allYears = ['2024', ...yearsFromConfig];
     
-    yearSelector.innerHTML = years.map(year => `<option value="${year}">${year}</option>`).join('');
+    yearSelector.innerHTML = allYears.map(year => `<option value="${year}">${year}</option>`).join('');
     
-    const latestYear = years[0];
+    const latestYear = yearsFromConfig[0];
     yearSelector.value = latestYear;
+    currentDataYear = latestYear; // Guardar el año inicial que tiene datos.
     return latestYear;
 }
+
 
 async function loadAndProcessData(year) {
     const newsletterGrid = document.getElementById('newsletter-grid');
@@ -971,7 +979,21 @@ const navFaq = document.getElementById('nav-faq');
 const toggleReadingModeBtn = document.getElementById('toggle-reading-mode');
 const modalShare = document.getElementById('modal-share');
 
-if (yearSelector) yearSelector.addEventListener('change', (e) => loadAndProcessData(e.target.value));
+// MODIFICACIÓN: Se añade la lógica para el año 2024.
+if (yearSelector) {
+    yearSelector.addEventListener('change', (e) => {
+        const selectedValue = e.target.value;
+        if (selectedValue === '2024') {
+            window.open('https://boletinia.tiddlyhost.com/#2024', '_blank');
+            // Restablecer el desplegable al último año que tenía datos
+            e.target.value = currentDataYear;
+        } else {
+            // Si se selecciona un año válido, se actualiza el año actual y se cargan los datos.
+            currentDataYear = selectedValue;
+            loadAndProcessData(selectedValue);
+        }
+    });
+}
 if (searchInput) searchInput.addEventListener('input', applyFilters);
 if (monthFilter) monthFilter.addEventListener('change', applyFilters);
 
