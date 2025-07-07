@@ -26,9 +26,18 @@ body {
     animation: spin 1s linear infinite;
     border-top-color: #10b981; /* emerald-500 */
 }
+
+/* --- INICIO DE LA CORRECCIÓN --- */
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+    to { 
+        transform: rotate(360deg); 
+    }
 }
+/* --- FIN DE LA CORRECCIÓN --- */
+
 
 /* Modal transitions */
 #modal {
