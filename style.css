@@ -23,21 +23,8 @@ body {
     color: #064e3b; /* emerald-900 */
 }
 .loader {
-    animation: spin 1s linear infinite;
     border-top-color: #10b981; /* emerald-500 */
 }
-
-/* --- INICIO DE LA CORRECCIÓN --- */
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to { 
-        transform: rotate(360deg); 
-    }
-}
-/* --- FIN DE LA CORRECCIÓN --- */
-
 
 /* Modal transitions */
 #modal {
