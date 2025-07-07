@@ -23,7 +23,7 @@ body {
     color: #064e3b; /* emerald-900 */
 }
 .loader {
-    border-top-color: #10b981; /* emerald-500 */
+    border-top-color: #10b981;
 }
 
 /* Modal transitions */
@@ -234,3 +234,7 @@ article {
         transform: translateX(-50%) translateY(0);
     }
 }
+
+/* Color distinto para que se aprecie el giro */
+.loader           { border-top-color: #10b981 !important; } /* modo claro  */
+.dark .loader     { border-top-color: #34d399 !important; } /* modo oscuro */
