@@ -678,12 +678,14 @@ function openModal(id) {
     window.currentNewsletterItem = item;
 
     setTimeout(() => {
+        // --- INICIO DE LA CORRECCIÓN ---
         if (quoteElement && item.citas && item.citas.trim() !== '') {
-            quoteElement.innerHTML = `<p>${item.citas}</p>`;
+            quoteElement.innerHTML = marked.parse(item.citas); // MODIFICADO: Usar marked.parse()
             quoteElement.style.display = 'block';
             quoteElement.style.opacity = '1';
             quoteElement.classList.add('content-fade-in');
         }
+        // --- FIN DE LA CORRECCIÓN ---
 
         if (bodyElement) {
             const bodyWithTitle = `<h3>Resumen</h3>\n${item.body || '*No hay contenido disponible.*'}`;
