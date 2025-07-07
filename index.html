@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boletín ChatGPT-IA-edu</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
+      tailwind.config = {
+        darkMode: 'class',
+        safelist: ['animate-spin']   /* garantiza que nunca falte */
+      }
     </script>
     
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
