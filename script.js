@@ -904,24 +904,35 @@ function formatWeekDisplay(weekNumber, year) {
 }
 
 function getYouTubeID(url) {
-    if(!url) return null;
-    const regExp = /^.*(http:\/\/googleusercontent.com\/youtube.com\/0\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    if (!url) return null;
+    // Expresión regular para extraer el ID de varias URL de YouTube (watch, embed, youtu.be, etc.).
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
+    // El ID de un vídeo de YouTube siempre tiene 11 caracteres.
     return (match && match[2].length === 11) ? match[2] : null;
 }
 
+
 function generateMediaEmbed(link, fullSize = false) {
     if (!link) return '';
-    
+
     const youtubeId = getYouTubeID(link);
     if (youtubeId) {
+        // URL de incrustación estándar de YouTube.
+        const embedUrl = `https://www.youtube.com/embed/${youtubeId}`;
+        // Atributos recomendados para el iframe.
+        const allowAttributes = `allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen`;
+
         if (fullSize) {
-            return `<div class="relative w-full max-w-4xl mx-auto mb-8"><div class="relative pb-[56.25%] h-0"><iframe class="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg" src="http:\/\/googleusercontent.com\/youtube.com\/1${youtubeId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>`;
+            // Vista grande para el modal (reproductor responsivo).
+            return `<div class="relative w-full max-w-4xl mx-auto mb-8"><div class="relative pb-[56.25%] h-0"><iframe class="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg" src="${embedUrl}" title="Reproductor de vídeo de YouTube" frameborder="0" ${allowAttributes}></iframe></div></div>`;
         } else {
-            return `<iframe width="100%" height="95" class="rounded-md" src="http:\/\/googleusercontent.com\/youtube.com\/1${youtubeId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            // Vista pequeña para la tarjeta de previsualización.
+            return `<iframe width="100%" height="165" class="rounded-md" src="${embedUrl}" title="Reproductor de vídeo de YouTube" frameborder="0" ${allowAttributes}></iframe>`;
         }
     }
-    
+
+    // La lógica existente para audio e iVoox no se modifica.
     if (link.match(/\.(mp3|wav|ogg|m4a)$/i)) {
         const audioElement = createAudioPlayer(link, fullSize);
         return fullSize ? `<div class="w-full max-w-2xl mx-auto mb-8">${audioElement}</div>` : audioElement;
@@ -936,6 +947,7 @@ function generateMediaEmbed(link, fullSize = false) {
 
     return '';
 }
+
 
 // Event Listeners
 document.body.addEventListener('click', function(event) {
