@@ -918,17 +918,17 @@ function generateMediaEmbed(link, fullSize = false) {
 
     const youtubeId = getYouTubeID(link);
     if (youtubeId) {
-        // URL de incrustación estándar de YouTube.
-        const embedUrl = `https://www.youtube.com/embed/${youtubeId}`;
-        // Atributos recomendados para el iframe.
-        const allowAttributes = `allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen`;
+        // URL de incrustación respetuosa con la privacidad (sin cookies hasta reproducción)
+        const embedUrl = `https://www.youtube-nocookie.com/embed/${youtubeId}`;
+        // Atributos iframe: sin `allow` para evitar avisos de Feature/Permissions Policy en algunos navegadores
+        const iframeExtra = `allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"`;
 
         if (fullSize) {
             // Vista grande para el modal (reproductor responsivo).
-            return `<div class="relative w-full max-w-4xl mx-auto mb-8"><div class="relative pb-[56.25%] h-0"><iframe class="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg" src="${embedUrl}" title="Reproductor de vídeo de YouTube" frameborder="0" ${allowAttributes}></iframe></div></div>`;
+            return `<div class="relative w-full max-w-4xl mx-auto mb-8"><div class="relative pb-[56.25%] h-0"><iframe class="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg" src="${embedUrl}" title="Reproductor de vídeo de YouTube" frameborder="0" ${iframeExtra}></iframe></div></div>`;
         } else {
             // Vista pequeña para la tarjeta de previsualización.
-            return `<iframe width="100%" height="165" class="rounded-md" src="${embedUrl}" title="Reproductor de vídeo de YouTube" frameborder="0" ${allowAttributes}></iframe>`;
+            return `<iframe width="100%" height="165" class="rounded-md" src="${embedUrl}" title="Reproductor de vídeo de YouTube" frameborder="0" ${iframeExtra}></iframe>`;
         }
     }
 

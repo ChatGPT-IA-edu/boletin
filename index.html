@@ -5,20 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boletín ChatGPT-IA-edu</title>
     
+    <!-- Aplica el modo oscuro lo antes posible para evitar parpadeo -->
+    <script>
+      (function() {
+        try {
+          const saved = localStorage.getItem('theme') || 'system';
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (saved === 'system' && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (_) {}
+      })();
+    </script>
+
+    <!-- Carga Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuración de Tailwind tras la carga del CDN -->
     <script>
       tailwind.config = {
         darkMode: 'class',
-        safelist: ['animate-spin']   /* garantiza que nunca falte */
+        safelist: ['animate-spin'] // garantiza que nunca falte
       }
     </script>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Favicon para evitar 404 en /favicon.ico -->
+    <link rel="icon" type="image/jpeg" href="chatgptTelegram.jpeg">
 
     <link rel="stylesheet" href="style.css">
 </head>
