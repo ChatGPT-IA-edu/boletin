@@ -185,10 +185,23 @@ function setCurrentAudio(audioElement) {
 function createAudioPlayer(src, isFullSize = false) {
     const audioId = `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const controlsClass = isFullSize ? "w-full" : "w-full";
+    const cleanSrc = (src || '').split('#')[0].split('?')[0];
+    const ext = cleanSrc.includes('.') ? cleanSrc.split('.').pop().toLowerCase() : '';
+    const mimeMap = {
+        mp3: 'audio/mpeg',
+        ogg: 'audio/ogg',
+        oga: 'audio/ogg',
+        wav: 'audio/wav',
+        m4a: 'audio/mp4',
+        aac: 'audio/aac',
+        flac: 'audio/flac',
+        webm: 'audio/webm'
+    };
+    const type = mimeMap[ext] || 'audio/mpeg';
     
     const audioHTML = `
         <audio id="${audioId}" controls class="${controlsClass}" preload="metadata">
-            <source src="${src}" type="audio/mpeg">
+            <source src="${src}" type="${type}">
             Tu navegador no soporta el elemento de audio.
         </audio>
     `;
@@ -342,10 +355,23 @@ function parseCSV(text) {
             return null;
         }
 
-        const keywordsRaw = values.length > 9 ? values.slice(9)
-            .flatMap(kwCell => kwCell.split(','))
-            .map(kw => kw.trim())
-            .filter(kw => kw) : [];
+        // Nueva columna final: 'audio'. Mantener compatibilidad hacia atrás.
+        let audioUrl = '';
+        let keywordsRaw = [];
+        if (values.length >= 10) {
+            audioUrl = (values[values.length - 1] || '').trim();
+            if (values.length > 10) {
+                keywordsRaw = values.slice(9, values.length - 1)
+                    .flatMap(kwCell => kwCell.split(','))
+                    .map(kw => kw.trim())
+                    .filter(kw => kw);
+            }
+        } else if (values.length > 9) {
+            keywordsRaw = values.slice(9)
+                .flatMap(kwCell => kwCell.split(','))
+                .map(kw => kw.trim())
+                .filter(kw => kw);
+        }
 
         return {
             id: values[1].trim(),
@@ -356,7 +382,8 @@ function parseCSV(text) {
             body: values[6] ? values[6].trim() : '',
             link: values[7] ? values[7].trim() : '',
             faq: values[8] ? values[8].trim() : '',
-            keywords: keywordsRaw
+            keywords: keywordsRaw,
+            audio: audioUrl
         };
     }).filter(item => item && item.id).sort((a, b) => b.dateInfo.startDate - a.dateInfo.startDate);
 }
@@ -385,6 +412,17 @@ function renderCards(newsletters) {
             card.style.animationDelay = `${index * 0.05}s`;
             
             const mediaEmbedHTML = generateMediaEmbed(item.link);
+            // Audio adicional desde la nueva columna 'audio'
+            let audioEmbedHTML = '';
+            if (item.audio && (!item.link || item.audio.trim() !== item.link.trim())) {
+                const audioInner = createAudioPlayer(item.audio, false);
+                const label = `<div class=\"text-xs font-semibold text-emerald-700 dark:text-emerald-300 mb-1 flex items-center gap-1\">🎧 <span>Podcast (audio)</span></div>`;
+                // Añade un margen muy pequeño sólo si ya hay vídeo/embebido encima
+                audioEmbedHTML = mediaEmbedHTML
+                    ? `<div class=\"mt-1\">${label}${audioInner}</div>`
+                    : `${label}${audioInner}`;
+            }
+            const combinedMedia = [mediaEmbedHTML, audioEmbedHTML].filter(Boolean).join('\n');
             const isExpanded = expandedCards.has(item.id);
             const keywordsToShow = isExpanded ? item.keywords : item.keywords.slice(0, 3);
             
@@ -425,9 +463,9 @@ function renderCards(newsletters) {
                         ${collapseButton}
                     </div>
                 </div>
-                ${mediaEmbedHTML ? `
+                ${combinedMedia ? `
                 <div class="media-container p-4 bg-slate-100 dark:bg-slate-800/50 border-y border-slate-200 dark:border-slate-700">
-                    ${mediaEmbedHTML}
+                    ${combinedMedia}
                 </div>
                 ` : ''}
                 <div class="p-4 bg-slate-50 dark:bg-slate-800/50">
@@ -723,7 +761,14 @@ function openModal(id) {
         }
         
         if (videoElement) {
-            videoElement.innerHTML = generateMediaEmbed(item.link, true);
+            const mainMedia = generateMediaEmbed(item.link, true);
+            let audioBlock = '';
+            if (item.audio && (!item.link || item.audio.trim() !== item.link.trim())) {
+                const audioHtml = createAudioPlayer(item.audio, true);
+                const label = `<div class=\"text-sm font-semibold text-emerald-700 dark:text-emerald-300 mb-2 flex items-center gap-2\">🎧 <span>Podcast (audio)</span></div>`;
+                audioBlock = `<div class=\"w-full max-w-4xl mx-auto mb-8\">${label}${audioHtml}</div>`;
+            }
+            videoElement.innerHTML = `${mainMedia || ''}${audioBlock}`;
             videoElement.style.opacity = '1';
             videoElement.classList.add('content-fade-in');
         }
@@ -928,7 +973,7 @@ function generateMediaEmbed(link, fullSize = false) {
             return `<div class="relative w-full max-w-4xl mx-auto mb-8"><div class="relative pb-[56.25%] h-0"><iframe class="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg" src="${embedUrl}" title="Reproductor de vídeo de YouTube" frameborder="0" ${iframeExtra}></iframe></div></div>`;
         } else {
             // Vista pequeña para la tarjeta de previsualización.
-            return `<iframe width="100%" height="165" class="rounded-md" src="${embedUrl}" title="Reproductor de vídeo de YouTube" frameborder="0" ${iframeExtra}></iframe>`;
+            return `<iframe width="100%" height="175" class="rounded-md" src="${embedUrl}" title="Reproductor de vídeo de YouTube" frameborder="0" ${iframeExtra}></iframe>`;
         }
     }
 
