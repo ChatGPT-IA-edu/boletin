@@ -726,7 +726,7 @@ function openModal(id) {
         // --- FIN DE LA CORRECCIÓN ---
 
         if (bodyElement) {
-            const bodyWithTitle = `<h3>Resumen</h3>\n${item.body || '*No hay contenido disponible.*'}`;
+            const bodyWithTitle = `### Resumen\n\n${item.body || '*No hay contenido disponible.*'}`;
             const processedBody = processMarkdownContent(bodyWithTitle);
             let htmlContent = marked.parse(processedBody);
             htmlContent = processExternalLinks(htmlContent);
