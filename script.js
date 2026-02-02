@@ -58,6 +58,28 @@ let currentDataYear = null;
 const CONFIG_URL = 'https://raw.githubusercontent.com/ChatGPT-IA-edu/boletin/refs/heads/main/config.json';
 const CORS_PROXY = 'https://corsproxy.io/?';
 
+async function fetchCsvText(csvUrl) {
+    const fetchText = async (url) => {
+        const response = await fetch(url, { redirect: 'follow' });
+        if (!response.ok) throw new Error(`HTTP error fetching CSV! status: ${response.status}`);
+        return await response.text();
+    };
+
+    try {
+        return await fetchText(csvUrl);
+    } catch (directError) {
+        if (!CORS_PROXY) throw directError;
+
+        try {
+            return await fetchText(`${CORS_PROXY}${encodeURIComponent(csvUrl)}`);
+        } catch (proxyError) {
+            const directMsg = directError && directError.message ? directError.message : String(directError);
+            const proxyMsg = proxyError && proxyError.message ? proxyError.message : String(proxyError);
+            throw new Error(`Fallo al cargar el CSV (directo y con proxy). Directo: ${directMsg}. Proxy: ${proxyMsg}.`);
+        }
+    }
+}
+
 // --- URL Management ---
 function updateURLWithCard(cardId) {
     const url = new URL(window.location);
@@ -288,9 +310,7 @@ async function loadAndProcessData(year) {
     }
 
     try {
-        const response = await fetch(`${CORS_PROXY}${encodeURIComponent(csvUrl)}`);
-        if (!response.ok) throw new Error(`HTTP error fetching CSV! status: ${response.status}`);
-        const csvText = await response.text();
+        const csvText = await fetchCsvText(csvUrl);
 
         if (!csvText) throw new Error("El contenido del CSV está vacío.");
 
