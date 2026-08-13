@@ -290,8 +290,8 @@ function populateYearSelector() {
         return null;
     }
 
-    // Añadir 2024 a la lista de años a mostrar
-    const allYears = ['2024', ...yearsFromConfig];
+    // Añadir 2024 al final: es el archivo más antiguo y la lista va de mayor a menor
+    const allYears = [...yearsFromConfig, '2024'];
     
     yearSelector.innerHTML = allYears.map(year => `<option value="${year}">${year}</option>`).join('');
     
