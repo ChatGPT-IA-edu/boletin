@@ -5,7 +5,7 @@
 - `script.js`: Lógica de carga (fetch de `config.json` y CSV), filtrado, modal, tema.
 - `style.css`: Estilos complementarios a Tailwind (transiciones, prose, resaltados).
 - `config.json`: Mapa año → URL CSV pública del boletín.
-- `chatgptTelegram.jpeg`: Favicon/logo.  Documentación: `guia_estilo_boletinia.md`.
+- `chatgptTelegram.jpeg`: Favicon/logo.
 
 ## Build, Test, and Development
 - Servir localmente (evita problemas CORS): `python3 -m http.server 8000` y abre `http://localhost:8000`.
@@ -30,5 +30,10 @@
 - Respeta `CONFIG_URL` y `CORS_PROXY` en `script.js`.
 - No elimines `defer` de scripts ni el preload del tema.
 - En depuración, ignora el aviso de Tailwind CDN sobre producción; este proyecto usa CDN.
-- Para contenido del boletín, sigue `guia_estilo_boletinia.md`.
+- Este repositorio es solo la web: no genera ni publica boletines. El contenido
+  lo produce el repositorio `automatizaciones/boletin-semanal`, que redacta el
+  boletín y escribe la fila en la hoja de cálculo. Aquí únicamente se consume el
+  CSV publicado, cuya URL por año está en `config.json`.
+- Los IDs de las hojas cambian cada año y viven en el `config.env` de aquel
+  repositorio. No los copies aquí.
 
